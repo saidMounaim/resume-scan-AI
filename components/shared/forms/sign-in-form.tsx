@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { signInSchema } from "@/lib/validators";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 type SignInFormValues = z.infer<typeof signInSchema>;
 
@@ -34,9 +36,33 @@ const SignInForm = () => {
 
   const onSubmit = async (values: SignInFormValues) => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsLoading(false);
-    console.log(values);
+    try {
+      await authClient.signIn.email(
+        {
+          email: values.email,
+          password: values.password,
+          callbackURL: "/dashboard",
+          rememberMe: false,
+        },
+        {
+          onRequest: () => {
+            setIsLoading(true);
+          },
+          onSuccess: () => {
+            window.location.href = "/dashboard";
+          },
+          onError: () => {
+            toast.error("Email or password is incorrect.");
+            setIsLoading(false);
+          },
+        }
+      );
+    } catch (error) {
+      toast.error("Failed to sign in. Please check your credentials.");
+      console.error("Sign-in error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

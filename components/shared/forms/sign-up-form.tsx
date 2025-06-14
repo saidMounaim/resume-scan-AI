@@ -16,10 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 import { signUpSchema } from "@/lib/validators";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUpForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,9 +41,34 @@ const SignUpForm = () => {
 
   const onSubmit = async (values: SignUpFormValues) => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsLoading(false);
-    console.log(values);
+    try {
+      await authClient.signUp.email(
+        {
+          email: values.email,
+          password: values.password,
+          name: values.firstName + " " + values.lastName,
+        },
+        {
+          onRequest: () => {
+            setIsLoading(true);
+          },
+          onSuccess: () => {
+            router.push("/sign-in");
+            toast.success("Account created successfully! Please sign in.");
+          },
+          onError: (ctx) => {
+            console.log(ctx);
+            toast.error(ctx.error.statusText);
+            setIsLoading(false);
+          },
+        }
+      );
+    } catch (error) {
+      toast.error("An error occurred while creating your account.");
+      console.error("Sign up error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
