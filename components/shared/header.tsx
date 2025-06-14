@@ -27,12 +27,12 @@ const Header = () => {
                 Upload Resume
               </Button>
             </Link>
-            <Link href="/signin">
+            <Link href="/sign-in">
               <Button variant="outline" className="mr-2">
                 Sign In
               </Button>
             </Link>
-            <Link href="/signup">
+            <Link href="/sign-up">
               <Button className="bg-blue-600 hover:bg-blue-700">Sign Up</Button>
             </Link>
           </div>
