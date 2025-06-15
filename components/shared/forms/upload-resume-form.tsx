@@ -1,15 +1,21 @@
 "use client";
 
+import cuid from "cuid";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { inngest } from "@/inngest/client";
+import { authClient } from "@/lib/auth-client";
 import { FileText, UploadIcon, X } from "lucide-react";
 import React, { useCallback, useState } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const UploadResumeForm = () => {
+  const router = useRouter();
+  const resumeResultId = cuid();
+  const { data: session } = authClient.useSession();
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -47,23 +53,34 @@ const UploadResumeForm = () => {
     if (!uploadedFile) return;
 
     setIsAnalyzing(true);
-    setProgress(0);
 
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(progressInterval);
-          setTimeout(() => {}, 500);
-          return 100;
-        }
-        return prev + 10;
+    try {
+      const userId = session?.user.id as string;
+      const resumeScan = await inngest.send({
+        name: "resume/scan",
+        data: {
+          resumeResultId,
+          userId,
+          resumeText: "John Smith\nSenior Software Engineer...\n",
+        },
       });
-    }, 200);
+      if (resumeScan.ids) {
+        toast.success("Resume analysis started successfully!");
+        router.push(`/resume/${resumeResultId}`);
+      } else {
+        toast.error("Failed to start resume analysis.");
+      }
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      setIsAnalyzing(false);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const removeFile = () => {
     setUploadedFile(null);
-    setProgress(0);
   };
 
   const formatFileSize = (bytes: number) => {
@@ -125,16 +142,6 @@ const UploadResumeForm = () => {
               </Button>
             )}
           </div>
-
-          {isAnalyzing && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Analyzing resume...</span>
-                <span>{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-          )}
 
           <Button
             onClick={handleAnalyze}

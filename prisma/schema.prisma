@@ -53,6 +53,7 @@ model User {
   updatedAt     DateTime
   account       Account[]
   session       Session[]
+  resumeResults ResumeResult[]
 }
 
 model Verification {
@@ -62,4 +63,12 @@ model Verification {
   expiresAt  DateTime
   createdAt  DateTime?
   updatedAt  DateTime?
+}
+
+model ResumeResult {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  result    Json
+  createdAt DateTime @default(now())
 }
