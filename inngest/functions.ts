@@ -90,28 +90,29 @@ Resume text:
         ],
         temperature: 0.3,
       });
-
       const raw = response.choices[0]?.message?.content ?? "{}";
+      const cleanedRaw = raw.replace(/```(?:json)?\n?([\s\S]*?)\n?```/, "$1");
 
       try {
-        const parsed = JSON.parse(raw);
+        const parsed = JSON.parse(cleanedRaw);
 
         const saved = await prisma.resumeResult.create({
           data: {
             id: resumeResultId,
             userId,
             result: parsed,
+            status: "done",
           },
         });
-
         return {
           id: saved.id,
           userId,
           ...parsed,
         };
       } catch (err) {
-        console.log(err);
-        throw new Error("Failed to parse JSON from OpenAI response");
+        throw new Error(
+          err instanceof Error ? err.message : "Failed to parse AI response"
+        );
       }
     });
 

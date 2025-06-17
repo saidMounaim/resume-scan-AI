@@ -8,6 +8,7 @@ import { FileText, UploadIcon, X } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { getResumeStatus } from "@/lib/actions/resume";
 
 const UploadResumeForm = () => {
   const router = useRouter();
@@ -56,19 +57,48 @@ const UploadResumeForm = () => {
 
     try {
       const userId = session?.user.id as string;
-      const resumeScan = await inngest.send({
-        name: "resume/scan",
-        data: {
-          resumeResultId,
-          userId,
-          resumeText: "John Smith\nSenior Software Engineer...\n",
+      const response = await fetch("/api/parse-resume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/pdf",
         },
+        body: uploadedFile,
       });
-      if (resumeScan.ids) {
-        toast.success("Resume analysis started successfully!");
-        router.push(`/resume/${resumeResultId}`);
+
+      const { text } = await response.json();
+      if (!text) {
+        toast.error("Failed to parse resume. Please try a different file.");
+        setIsAnalyzing(false);
+        return;
       } else {
-        toast.error("Failed to start resume analysis.");
+        const resumeScan = await inngest.send({
+          name: "resume/scan",
+          data: {
+            resumeResultId,
+            userId,
+            resumeText: text,
+          },
+        });
+        if (resumeScan.ids) {
+          toast.success("Resume scan started...");
+
+          const maxAttempts = 20;
+          for (let i = 0; i < maxAttempts; i++) {
+            const status = await getResumeStatus(resumeResultId);
+            if (status === "done") {
+              toast.success("Resume analysis complete!");
+              router.push(`/resume/${resumeResultId}`);
+              setIsAnalyzing(false);
+              return;
+            }
+            await new Promise((res) => setTimeout(res, 2000));
+          }
+
+          toast.error("Scan timed out.");
+        } else {
+          toast.error("Failed to start resume analysis.");
+          return;
+        }
       }
     } catch (error) {
       console.error("Analysis failed:", error);

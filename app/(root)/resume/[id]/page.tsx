@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,14 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getResumeById } from "@/lib/actions/resume";
-import {
-  AlertCircle,
-  Briefcase,
-  CheckCircle,
-  Download,
-  MapPin,
-  Share2,
-} from "lucide-react";
+import { AlertCircle, Briefcase, CheckCircle, MapPin } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -27,8 +21,7 @@ export default async function ResumePage({
 }) {
   const { id } = await params;
 
-  const resume = await getResumeById(id);
-
+  const resume: any = await getResumeById(id);
   if (!resume) notFound();
 
   const getScoreColor = (score: number) => {
@@ -54,16 +47,6 @@ export default async function ResumePage({
             <p className="text-gray-600">
               Complete analysis of your resume with actionable feedback
             </p>
-          </div>
-          <div className="flex space-x-3">
-            <Button variant="outline" size="sm">
-              <Share2 className="w-4 h-4 mr-2" />
-              Share
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Download Report
-            </Button>
           </div>
         </div>
 
@@ -121,7 +104,7 @@ export default async function ResumePage({
               </CardHeader>
               <CardContent>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  {resume.result.skills?.map((skill, index) => (
+                  {resume.result.skills?.map((skill: any, index: number) => (
                     <div key={index} className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="font-medium text-gray-900">
@@ -144,35 +127,35 @@ export default async function ResumePage({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {resume?.suggestions?.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex-shrink-0 mt-1">
-                      {suggestion.type === "improvement" ? (
-                        <CheckCircle className="w-5 h-5 text-blue-600" />
-                      ) : (
-                        <AlertCircle className="w-5 h-5 text-yellow-600" />
-                      )}
+                {resume.result.suggestions?.map(
+                  (suggestion: any, index: number) => (
+                    <div
+                      key={index}
+                      className="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex-shrink-0 mt-1">
+                        {suggestion.type === "improvement" ? (
+                          <CheckCircle className="w-5 h-5 text-blue-600" />
+                        ) : (
+                          <AlertCircle className="w-5 h-5 text-yellow-600" />
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 mb-1">
+                          {suggestion.title}
+                        </h4>
+                        <p className="text-gray-600 text-sm">
+                          {suggestion.description}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900 mb-1">
-                        {suggestion.title}
-                      </h4>
-                      <p className="text-gray-600 text-sm">
-                        {suggestion.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  )
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Column */}
           <div className="space-y-6">
-            {/* Score Breakdown */}
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle>Score Breakdown</CardTitle>
