@@ -52,3 +52,15 @@ export async function getResumeStatus(resumeResultId: string) {
     return { success: false, error: "Failed to fetch resume status" };
   }
 }
+
+export async function deleteResumeById(id: string) {
+  try {
+    await prisma.resumeResult.delete({
+      where: { id },
+    });
+    return { success: true };
+  } catch (error) {
+    console.log(error);
+    return { success: false, error: "Failed to delete resume" };
+  }
+}

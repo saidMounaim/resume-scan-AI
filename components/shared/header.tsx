@@ -24,12 +24,12 @@ const Header = async () => {
           <div className="flex items-center space-x-4">
             {session ? (
               <>
-                <UserDropdown />
                 <Link href="/upload">
                   <Button className="bg-blue-600 hover:bg-blue-700">
                     Upload Resume
                   </Button>
                 </Link>
+                <UserDropdown />
               </>
             ) : (
               <>

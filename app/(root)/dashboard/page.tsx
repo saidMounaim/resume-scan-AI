@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import DeleteResume from "@/components/shared/delete-resume";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,7 @@ import {
 import { getAllResumesByUserId } from "@/lib/actions/resume";
 import { auth } from "@/lib/auth";
 import { formatDate, getScoreColor } from "@/lib/utils";
-import { Calendar, Eye, FileText, Plus, Trash2 } from "lucide-react";
+import { Calendar, Eye, FileText, Plus } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -120,13 +121,7 @@ export default async function DashboardPage() {
                           View
                         </Button>
                       </Link>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <DeleteResume resumeId={analysis.id} />
                     </div>
                   </div>
                 ))}

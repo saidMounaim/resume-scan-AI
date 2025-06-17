@@ -8,13 +8,13 @@ import {
 } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export default async function UploadPage() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
-  if (!session) notFound();
+  if (!session) redirect("/sign-in");
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
