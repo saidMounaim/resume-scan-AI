@@ -10,7 +10,10 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getResumeById } from "@/lib/actions/resume";
+import { auth } from "@/lib/auth";
+import { getScoreBgColor, getScoreColor } from "@/lib/utils";
 import { AlertCircle, Briefcase, CheckCircle, MapPin } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -19,22 +22,15 @@ export default async function ResumePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) notFound();
+
   const { id } = await params;
 
   const resume: any = await getResumeById(id);
   if (!resume) notFound();
-
-  const getScoreColor = (score: number) => {
-    if (score >= 85) return "text-green-600";
-    if (score >= 70) return "text-yellow-600";
-    return "text-red-600";
-  };
-
-  const getScoreBgColor = (score: number) => {
-    if (score >= 85) return "bg-green-100";
-    if (score >= 70) return "bg-yellow-100";
-    return "bg-red-100";
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

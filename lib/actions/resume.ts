@@ -2,6 +2,25 @@
 
 import { prisma } from "../prisma";
 
+export async function getAllResumesByUserId(userId: string) {
+  try {
+    const resumes = await prisma.resumeResult.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        result: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+    return resumes;
+  } catch (error) {
+    console.log(error);
+    return { success: false, error: "Failed to fetch resumes" };
+  }
+}
+
 export async function getResumeById(id: string) {
   try {
     const resume = await prisma.resumeResult.findUnique({
