@@ -2,7 +2,6 @@
 
 import cuid from "cuid";
 import { Button } from "@/components/ui/button";
-import { inngest } from "@/inngest/client";
 import { authClient } from "@/lib/auth-client";
 import { FileText, UploadIcon, X } from "lucide-react";
 import React, { useCallback, useState } from "react";
@@ -71,15 +70,18 @@ const UploadResumeForm = () => {
         setIsAnalyzing(false);
         return;
       } else {
-        const resumeScan = await inngest.send({
-          name: "resume/scan",
-          data: {
+        const resumeScan = await fetch("/api/resume/scan", {
+          method: "POST",
+          body: JSON.stringify({
             resumeResultId,
             userId,
             resumeText: text,
+          }),
+          headers: {
+            "Content-Type": "application/json",
           },
         });
-        if (resumeScan.ids) {
+        if (resumeScan.ok) {
           toast.success("Resume scan started...");
 
           const maxAttempts = 20;
